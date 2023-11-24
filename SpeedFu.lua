@@ -1,7 +1,7 @@
 local dewdrop = AceLibrary("Dewdrop-2.0")
 local tablet = AceLibrary("Tablet-2.0")
 local L = AceLibrary("AceLocale-2.0"):new("SpeedFu")
-
+local UPDATE_INTERVAL = 1/60
 
 SpeedFu = AceLibrary("AceAddon-2.0"):new("FuBarPlugin-2.0", "AceEvent-2.0", "AceConsole-2.0", "AceDB-2.0", "Metrognome-2.0")
 SpeedFu.hasIcon = "Interface\\Icons\\Ability_Rogue_Sprint.blp"
@@ -116,7 +116,7 @@ function SpeedFu:OnInitialize()
 	self.vars = {}
 	self.text = "???%";
 	
-	self:RegisterMetro(self.name, self.UpdateSpeed, 0.5, self)	
+	self:RegisterMetro(self.name, self.UpdateSpeed, UPDATE_INTERVAL, self)	
 	
 end
 
@@ -212,7 +212,7 @@ function SpeedFu:UpdateSpeed(difference)
 				
 		self.vars.fSpeedDist = self.vars.fSpeedDist + dist;
 		
-		if (self.vars.iDeltaTime >= .5) then	
+		if (self.vars.iDeltaTime >= UPDATE_INTERVAL) then	
 			local continent = GetCurrentMapContinent();
 			local zone = GetCurrentMapZone();
 			local displacement = (self.vars.fSpeedDist / self.vars.iDeltaTime);
