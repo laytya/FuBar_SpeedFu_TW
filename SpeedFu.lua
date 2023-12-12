@@ -233,10 +233,10 @@ function SpeedFu:UpdateSpeed(difference)
 			end
 				
 			
-			if not self.db.account.zoneBaseRate[continent] or not self.db.account.zoneBaseRate[continent][zone] then
-				printT({"zoneBaseRate[continent][zone]",continent=continent,zone=zone})
+			-- if not self.db.account.zoneBaseRate[continent] or not self.db.account.zoneBaseRate[continent][zone] then
+				-- printT({"zoneBaseRate[continent][zone]",continent=continent,zone=zone})
 
-			end
+			-- end
 			baserate = self.db.account.zoneBaseRate[continent][zone];
 			if (baserate ~= nil and baserate ~= 0) then
 				self.vars.fSpeed = self:Round( (displacement / baserate) * 100);	
