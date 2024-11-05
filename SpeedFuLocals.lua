@@ -21,6 +21,10 @@ L:RegisterTranslations("enUS", function() return {
 	WARSONG			= "Warsong Gulch",
 	ALTERAC			= "Alterac Valley",
 	ARATHI			= "Arathi Basin",
+	DIREMAUL		= "Dire Maul",
+	EMERALDSANCTUM  = "Emerald Sanctum",
+	KARAZHAN		= "Karazhan",
+	DEEPRUNTRAM		= "Deeprun Tram",
 	
 } end )
 

@@ -2,6 +2,8 @@ local dewdrop = AceLibrary("Dewdrop-2.0")
 local tablet = AceLibrary("Tablet-2.0")
 local L = AceLibrary("AceLocale-2.0"):new("SpeedFu")
 
+local superwow = SpellInfo and true or false
+local baserate = 7
 
 SpeedFu = AceLibrary("AceAddon-2.0"):new("FuBarPlugin-2.0", "AceEvent-2.0", "AceConsole-2.0", "AceDB-2.0", "Metrognome-2.0")
 SpeedFu.hasIcon = "Interface\\Icons\\Ability_Rogue_Sprint.blp"
@@ -72,6 +74,11 @@ function SpeedFu:OnInitialize()
 				[24] = 0.0001,
 				[25] = 0.0001,
 				[26] = 0.01006, -- Thunderbluff
+				[27] = 0.0001,
+				[28] = 0.0001,
+				[29] = 0.0001,
+				[30] = 0.0001,
+				
 			},		
 			[2] = {
 				[1] = 0.00210,	-- Alterac Mtns
@@ -98,16 +105,40 @@ function SpeedFu:OnInitialize()
 				[22] = 0.01094,	-- Undercity
 				[23] = 0.00244,	-- Western Plaguelands
 				[24] = 0.00300,	-- Westfall
-				[25] = 0.00254	-- Wetlands
+				[25] = 0.00254,	-- Wetlands
+				[26] = 0.002,
+				[27] = 0.002,
+				[28] = 0.002,
+				[29] = 0.002,
+				[30] = 0.002,
+				[31] = 0.002,
+				[32] = 0.002,
+				[33] = 0.002,
+				[34] = 0.002,
+				[35] = 0.002539,
+
+			},	
+			[5] = {
+				[1] = 0.002,
 			},	
 			[8] = {
-				[1] = 0.005705 -- Naxxramas
+				[1] = 0.005705, -- Naxxramas
+				[2] = 0.002, 	-- Naxxramas 2
 			},	
+			[6] = {
+				[1] = 0.005705, 
+				[2] = 0.002, 	
+			},
+			
 			['special'] = {
 				[L["BLACKROCK"]] = 0.0002983199214410154,
 				[L["WARSONG"]] = 0.009159138767039199,
 				[L["ALTERAC"]] = 0.002477872662261515,
-				[L["ARATHI"]] = 0.005978692329518227
+				[L["ARATHI"]] = 0.005978692329518227,
+				[L["DIREMAUL"]] = 0.000285,
+				[L["EMERALDSANCTUM"]] = 0.001,
+				[L["KARAZHAN"]] = 0.001,
+				[L["DEEPRUNTRAM"]] = 0.001,
 			}
 		}
 	})
@@ -190,12 +221,21 @@ function SpeedFu:UpdateSpeed(difference)
 		self.vars.fSpeedDist = 0.0;
 		self.vars.CurrPos = {};
 		self.vars.lastPos = {};
-		self.vars.lastPos.x, self.vars.lastPos.y = GetPlayerMapPosition("player");	
+		if superwow then
+			self.vars.lastPos.x, self.vars.lastPos.y = UnitPosition("player")
+		else
+		    self.vars.lastPos.x, self.vars.lastPos.y = GetPlayerMapPosition("player");	
+	        end
 	end
-
 		
 	self.vars.iDeltaTime = self.vars.iDeltaTime + difference;
-	self.vars.CurrPos.x, self.vars.CurrPos.y = GetPlayerMapPosition("player");
+	if superwow then
+		self.vars.CurrPos.x, self.vars.CurrPos.y = UnitPosition("player")
+	else
+	    self.vars.CurrPos.x, self.vars.CurrPos.y = GetPlayerMapPosition("player");
+	end
+
+	
 	
 	if ((self.vars.CurrPos.x == 0) and (self.vars.CurrPos.y == 0)) then
 	
@@ -205,30 +245,37 @@ function SpeedFu:UpdateSpeed(difference)
 		
 	else
 	
-		local dist = math.sqrt(
-				((self.vars.lastPos.x - self.vars.CurrPos.x) * (self.vars.lastPos.x - self.vars.CurrPos.x) * 2.25 ) +
-				((self.vars.lastPos.y - self.vars.CurrPos.y) * (self.vars.lastPos.y - self.vars.CurrPos.y))
-				);	
-				
+		local dist = (self.vars.lastPos.x - self.vars.CurrPos.x) * (self.vars.lastPos.x - self.vars.CurrPos.x)
+		if not superwow then
+			dist = dist * 2.25
+		end
+		dist = 	math.sqrt(dist + (self.vars.lastPos.y - self.vars.CurrPos.y) * (self.vars.lastPos.y - self.vars.CurrPos.y))
 		self.vars.fSpeedDist = self.vars.fSpeedDist + dist;
 		
 		if (self.vars.iDeltaTime >= .5) then	
 			local continent = GetCurrentMapContinent();
 			local zone = GetCurrentMapZone();
 			local displacement = (self.vars.fSpeedDist / self.vars.iDeltaTime);
-			local baserate; 
 			
 			if zone == 0 then
 				continent = "special";
 				zone = GetZoneText();
+				if zone == "" then 
+					zone = "none"
+				end
 			end
 			
 
 			if (self.vars.setRate == true) then
+				if not superwow then
 				-- recalibrate this zone, the user should know this should be done when running at 100%
 				self.db.account.zoneBaseRate[continent][zone] = displacement;
 				self:Print(L["NEW_BASERATE_FORMAT"], zone, displacement);
 				-- done calibrating
+					
+				else
+					baserate = displacement 
+				end
 				self.vars.setRate = false;
 			end
 				
@@ -237,7 +284,9 @@ function SpeedFu:UpdateSpeed(difference)
 				printT({"zoneBaseRate[continent][zone]",continent=continent,zone=zone})
 
 			end
-			baserate = self.db.account.zoneBaseRate[continent][zone];
+			if not superwow then
+			   baserate = self.db.account.zoneBaseRate[continent][zone];
+			end
 			if (baserate ~= nil and baserate ~= 0) then
 				self.vars.fSpeed = self:Round( (displacement / baserate) * 100);	
 				self.vars.fSpeedDist = 0.0;
@@ -247,8 +296,6 @@ function SpeedFu:UpdateSpeed(difference)
 				self.vars.fSpeedDist = 0.0;
 				self.vars.iDeltaTime = 0.0;		
 			end
-			
-			
 		end -- if (self.vars.iDeltaTime >= .5) 
 		
 	end -- if  ((self.vars.CurrPos.x == 0) and (self.vars.CurrPos.y == 0)) 
